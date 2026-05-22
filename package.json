@@ -9,7 +9,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "backup": "git add . && git commit -m 'backup automatico' && git push"
   },
   "dependencies": {
     "firebase": "^12.13.0",

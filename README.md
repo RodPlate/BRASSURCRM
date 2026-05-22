@@ -1,225 +1,92 @@
 # CRM BRASSUR
 
-CRM web interno para **BRASSUR**: gestión comercial de proveedores de materiales metálicos reciclables (chatarra, hierro, aluminio, cobre, inox, etc.). Centraliza proveedores, contactos, oportunidades de compra, actividades de seguimiento, inteligencia comercial y fotos de visita en campo.
+**CRM interno para gestión de proveedores y desarrollo comercial** en BRASSUR — materiales metálicos reciclables (chatarra, hierro, aluminio, cobre, inox, etc.).
+
+Centraliza proveedores, contactos, oportunidades, actividades, seguimientos, inteligencia comercial, calidad de datos, timeline auditable y fotos de visita en campo (PWA).
+
+| | |
+|---|---|
+| **Producción** | https://brassurcrm.web.app |
+| **Firebase** | Proyecto `crm-brassur` · Firestore `brassurcrm` |
+| **Documentación Firebase** | [docs/firebase-setup.md](docs/firebase-setup.md) |
 
 ---
 
-## ¿Qué resuelve?
+## Descripción
 
-- Registrar y priorizar **proveedores** con ficha completa (ubicación, rubro, materiales, volumen estimado, estado comercial).
-- Gestionar **contactos** vinculados a cada proveedor.
-- Seguir **oportunidades de compra** (material, volumen, precios, fechas, negociación).
-- Registrar **actividades** (llamadas, WhatsApp, reuniones, visitas, email).
-- Ver **seguimientos** agrupados por vencidos, hoy y próximos 7 días.
-- Trabajar el día a día desde **Hoy** (centro de trabajo con acciones rápidas).
-- Analizar el negocio en **Inteligencia Comercial** (KPIs, ranking, materiales, geografía, recomendaciones).
-- Mejorar datos con **Calidad de Datos** (duplicados, completitud, score, sugerencias).
-- Capturar **fotos de visita** en campo (PWA + móvil), asignarlas después al proveedor correcto.
-- Mantener un **timeline** auditable por proveedor de todo lo que ocurre en el CRM.
+CRM web de uso interno del equipo comercial. Permite:
 
----
+- Registrar y priorizar **proveedores** con ficha completa.
+- Gestionar **contactos**, **actividades** y **oportunidades de compra**.
+- Planificar el día con **Hoy** y **Seguimientos** (vencidos, hoy, próximos 7 días).
+- Analizar el negocio con **Inteligencia Comercial** y mejorar registros con **Calidad de Datos**.
+- Capturar **fotos de visita** sin conexión estable al dato (subida en campo, asignación posterior).
+- Mantener un **timeline** por proveedor de eventos automáticos y notas manuales.
+- Cargar la base inicial con **Importador Excel**.
 
-## Stack tecnológico
-
-| Capa | Tecnología |
-|------|------------|
-| Frontend | React 19 + Vite 8 |
-| Enrutamiento | React Router 7 |
-| Backend / datos | Firebase (Auth, Firestore, Storage, Hosting) |
-| Base Firestore | `brassurcrm` (`getFirestore(app, "brassurcrm")`) |
-| Excel | `xlsx` (importación y exportación) |
-| PWA | `vite-plugin-pwa` + Service Worker |
-| Estilos | CSS modular por módulo |
+Acceso protegido con Firebase Authentication (email y contraseña). Sin sesión válida no hay acceso a módulos.
 
 ---
 
-## Arquitectura general
+## Stack
 
-```
-Usuario (navegador / PWA instalada)
-        │
-        ▼
-   Firebase Auth (email/contraseña)
-        │
-        ▼
-   React SPA ──► Firestore (brassurcrm)
-              └──► Storage (fotos)
-              └──► Hosting (dist/)
-```
-
-- **Sin sesión** → pantalla de login.
-- **Con sesión** → layout con sidebar, topbar (usuario + cerrar sesión) y módulos.
-- **Cierre por inactividad** (~6 h) y datos de auditoría en altas/ediciones (`createdBy`, `updatedBy`, timestamps).
+| Tecnología | Uso |
+|------------|-----|
+| **React** 19 | Interfaz y componentes |
+| **Vite** 8 | Build y dev server |
+| **Firebase** | Plataforma backend |
+| **Firestore** | Base `brassurcrm` (no la instancia default) |
+| **Storage** | Fotos de visitas |
+| **Firebase Auth** | Login email / contraseña |
+| **PWA** | `vite-plugin-pwa`, instalable en móvil y escritorio |
+| React Router 7 | Navegación SPA |
+| `xlsx` | Importación y exportación Excel |
 
 ---
 
-## Módulos y rutas
+## Funciones
 
-| Ruta | Módulo | Descripción |
-|------|--------|-------------|
-| `/` | **Dashboard** | Resumen: proveedores, contactos, actividades, oportunidades, seguimientos urgentes, fotos pendientes. |
-| `/fotos` | **Bandeja de Fotos** | Tomar/subir fotos sin proveedor; asignar después. Solo muestra pendientes. |
-| `/hoy` | **Centro de Trabajo (Hoy)** | Vencidos, hoy, próximos 7 días, oportunidades calientes, top proveedores; acciones rápidas. |
-| `/proveedores` | **Proveedores** | Alta, edición, ficha con contactos, oportunidades, actividades, timeline y fotos asignadas. |
-| `/importar-proveedores` | **Importar Proveedores** | Carga masiva desde Excel (base inicial). |
-| `/contactos` | **Contactos** | Personas de contacto por proveedor. |
-| `/oportunidades` | **Oportunidades de compra** | Pipeline de negociación y compras estimadas. |
-| `/actividades` | **Actividades** | Llamadas, visitas, reuniones, etc. |
-| `/seguimientos` | **Seguimientos** | Vista unificada de fechas de seguimiento y compras. |
-| `/inteligencia` | **Inteligencia Comercial** | KPIs, ranking, gráficos, acciones recomendadas, export Excel. |
-| `/calidad-datos` | **Calidad de Datos** | Duplicados, completitud, score, tiers y mejoras sugeridas. |
-
----
-
-## Colecciones Firestore (principal)
-
-| Colección | Uso |
-|-----------|-----|
-| `suppliers` | Proveedores (razón social, ubicación, rubro, materiales, volumen, estado, prioridad, score calidad). |
-| `contacts` | Contactos por `supplierId`. |
-| `activities` | Interacciones comerciales. |
-| `purchaseOpportunities` | Oportunidades de compra. |
-| `timeline` | Historial por proveedor (automático + notas rápidas). |
-| `visitPhotos` | Fotos de visita (pendientes o asignadas a proveedor). |
-| `workDayProgress` | Contador de tareas realizadas en **Hoy** por usuario y día. |
-
-### Fotos de visita (`visitPhotos`)
-
-**Estados:**
-
-- `Pendiente de asignar` — en bandeja (`/fotos`), `supplierId` vacío.
-- `Asignada` — visible en ficha del proveedor.
-
-**Storage:**
-
-- Pendientes: `suppliers/unassigned/{photoId}/{fileName}`
-- Asignadas (referencia en doc): ruta original en Storage; la asignación actualiza solo Firestore (sin mover archivo).
-
-**Flujo:**
-
-1. En **Bandeja de Fotos** o en ficha: tomar foto (cámara) o elegir galería.
-2. Compresión en navegador (`src/utils/imageCompression.js`): máx. 1920 px, JPEG 80 %, sin EXIF.
-3. Vista previa → subida con `uploadBytesResumable` y barra de progreso.
-4. Asignar proveedor desde bandeja → desaparece de pendientes y aparece en ficha.
-5. Timeline: foto subida, foto asignada, foto eliminada.
-
-**Campos principales:** `url`, `storagePath`, `fileName`, `caption`, `originalSize`, `compressedSize`, `compressionRatio`, `uploadedAt`, `uploadedBy`, `assignedAt`, `assignedBy`.
+| Módulo | Ruta | Resumen |
+|--------|------|---------|
+| **Dashboard** | `/` | KPIs, accesos rápidos, alertas (seguimientos, fotos pendientes). |
+| **Proveedores** | `/proveedores` | Alta, edición, ficha (contactos, oportunidades, actividades, timeline, fotos). |
+| **Contactos** | `/contactos` | Personas vinculadas a proveedores. |
+| **Actividades** | `/actividades` | Llamadas, WhatsApp, reuniones, visitas, email. |
+| **Oportunidades** | `/oportunidades` | Pipeline de compra (material, volumen, precios, fechas). |
+| **Seguimientos** | `/seguimientos` | Vista unificada de fechas de seguimiento y compras esperadas. |
+| **Hoy** | `/hoy` | Centro de trabajo diario, acciones rápidas, progreso del día. |
+| **Inteligencia Comercial** | `/inteligencia` | KPIs, ranking, gráficos, recomendaciones, export Excel. |
+| **Calidad de Datos** | `/calidad-datos` | Duplicados, completitud, score, tiers y mejoras sugeridas. |
+| **Timeline** | En ficha proveedor | Historial filtrable; eventos automáticos + notas rápidas. |
+| **Fotos** | `/fotos` | Bandeja: captura/subida pendiente y asignación a proveedor. |
+| **Importador Excel** | `/importar-proveedores` | Carga masiva de proveedores con vista previa y validación. |
+| **PWA** | Global | Instalación, iconos, service worker, banner de instalación. |
 
 ---
 
-## Centro de Trabajo — Hoy
-
-- **Vencidos** — seguimientos con fecha pasada.
-- **Hoy** — seguimientos, llamadas, reuniones, visitas, WhatsApp del día.
-- **Próximos 7 días** — planificación semanal.
-- **Oportunidades calientes** — negociando + prioridad alta + sin actividad reciente.
-- **Top proveedores a contactar** — scoring por volumen, oportunidades abiertas e inactividad.
-
-**Acciones rápidas:** llamada, WhatsApp, nota en timeline, nueva actividad, abrir ficha, marcar realizado.
-
-**Progreso del día:** colección `workDayProgress` (por usuario y fecha).
-
----
-
-## Timeline
-
-- Historial en la **ficha del proveedor** (más reciente primero).
-- Registro automático al crear/editar proveedor, importar, contactos, actividades, oportunidades, fotos y cambios de estado.
-- **Nota rápida** manual desde la ficha.
-- Filtros: hoy, semana, mes, tipo de evento, usuario.
-
----
-
-## Inteligencia Comercial
-
-- **KPIs:** totales, activos, nuevos del mes, oportunidades abiertas/ganadas, volumen potencial/ganado, tasa de conversión.
-- **Ranking de proveedores** con score 0–100 y clasificación (Estratégico, Alto potencial, Desarrollo, Baja prioridad).
-- **Análisis por material** (gráficos de barras).
-- **Análisis geográfico** por departamento.
-- **Acciones recomendadas** (urgente, alta, media) según seguimientos y oportunidades.
-- **Exportar Excel:** proveedores, oportunidades, actividades, dashboard, reporte completo.
-
-### Reglas del score de proveedor (resumen)
-
-| Regla | Puntos |
-|-------|--------|
-| Estado Activo | +20 |
-| Oportunidad abierta | +15 |
-| Actividad últimos 30 días | +10 |
-| Prioridad Alta | +10 |
-| Sin actividad > 90 días | −20 |
-| Descartado | −30 |
-
-| Score | Clasificación |
-|-------|----------------|
-| 80+ | Estratégico |
-| 60–79 | Alto potencial |
-| 40–59 | Desarrollo |
-| 0–39 | Baja prioridad |
-
----
-
-## Calidad de Datos
-
-- Detección de **duplicados** (nombre similar, mismo teléfono, mismo contacto).
-- **Completitud** por proveedor (% campos clave).
-- **Score y tier** A–D con sugerencias de mejora (materiales inferidos, rubro, etc.).
-- **Aplicar mejoras** y **confirmar cambios** en Firestore por lotes.
-
----
-
-## Seguimientos
-
-Unifica fechas de:
-
-- `suppliers.nextFollowUpDate`
-- `activities.nextFollowUpDate`
-- `purchaseOpportunities.expectedPurchaseDate`
-
-Agrupa en: **vencidos**, **hoy**, **próximos 7 días**, **futuros**. Filtros por proveedor, tipo, estado y prioridad.
-
----
-
-## Importar Proveedores
-
-- Lectura de Excel (plantilla compatible con columna de empresa / razón social).
-- Vista previa, detección de duplicados y errores por fila.
-- Escritura por lotes en `suppliers` con registro en timeline.
-
----
-
-## Autenticación y seguridad
-
-- Login con **email y contraseña** (Firebase Authentication).
-- Solo usuarios creados en Firebase Console pueden entrar.
-- Reglas Firestore/Storage: acceso con `request.auth != null` (configurar en consola del proyecto).
-- La app no funciona offline para datos de negocio (Auth y Firestore requieren red).
-
-**En Firebase Console:**
-
-1. Activar **Authentication → Email/Password**.
-2. Crear usuarios del equipo.
-3. Desplegar reglas e índices según el proyecto.
-
----
-
-## PWA (aplicación instalable)
-
-- Instalable en Android, PC (Chrome/Edge) e iPhone (Añadir a pantalla de inicio).
-- Iconos en `public/icons/` (generados con `npm run icons`).
-- Service Worker cachea la interfaz; datos en tiempo real vienen de Firebase.
-- Banner **Instalar CRM BRASSUR** cuando el navegador lo permite.
-- Ideal para **fotos en visita** con cámara del celular (`capture="environment"`).
-
----
-
-## Configuración local
+## Instalación
 
 ### Requisitos
 
-- Node.js 18+
-- Cuenta Firebase con proyecto configurado
-- Variables de entorno en `.env` (copiar desde `.env.example`)
+- Node.js **18+**
+- Proyecto Firebase configurado (`crm-brassur`)
+- Firebase CLI (para deploy): `npm i -g firebase-tools`
+
+### Pasos
+
+```bash
+# Clonar o abrir el repositorio
+cd "CRM BRASSUR"
+
+# Variables de entorno (no commitear .env)
+cp .env.example .env
+# Completar VITE_FIREBASE_* según Firebase Console
+
+npm install
+npm run dev
+```
+
+Abrir la URL de Vite (por defecto `http://localhost:5173`).
 
 ### Variables de entorno
 
@@ -232,105 +99,199 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=
 VITE_FIREBASE_APP_ID=
 ```
 
-### Instalación y desarrollo
-
-```bash
-cp .env.example .env
-# Editar .env con las credenciales del proyecto Firebase
-
-npm install
-npm run dev
-```
-
-Abrir la URL que muestra Vite (por defecto `http://localhost:5173`).
-
-### Generar iconos PWA
-
-```bash
-npm run icons
-```
-
-Usa `public/pwa-source.svg` y escribe en `public/icons/`.
+Detalle de Firebase, índices y errores frecuentes: **[docs/firebase-setup.md](docs/firebase-setup.md)**.
 
 ---
 
-## Scripts npm
+## Deploy
 
-| Comando | Descripción |
-|---------|-------------|
-| `npm run dev` | Servidor de desarrollo (PWA activa en dev). |
-| `npm run build` | Build de producción en `dist/` (genera iconos antes). |
-| `npm run preview` | Previsualizar el build local. |
-| `npm run icons` | Regenerar iconos PWA. |
-| `npm run lint` | ESLint. |
-
----
-
-## Despliegue
-
-### Hosting (Firebase)
+### Hosting (producción)
 
 ```bash
 npm run build
 firebase deploy --only hosting
 ```
 
-El `firebase.json` apunta `public` a `dist/` y reescribe rutas al SPA.
+Salida en `dist/`. Hosting configurado en `firebase.json` (target `brassurcrm`, SPA con rewrite a `index.html`).
 
-### Índices Firestore (obligatorio para varias pantallas)
+### Índices Firestore (recomendado tras cambios en consultas)
 
 ```bash
 firebase deploy --only firestore:indexes
 ```
 
-Índices definidos en `firestore.indexes.json`:
+Definidos en `firestore.indexes.json` (`timeline`, `visitPhotos`).
 
-- `timeline`: `supplierId` + `date` (desc)
-- `visitPhotos`: `status` + `uploadedAt` (desc) — bandeja
-- `visitPhotos`: `supplierId` + `uploadedAt` (desc) — legacy
-- `visitPhotos`: `supplierId` + `status` + `uploadedAt` (desc) — ficha proveedor
+### Scripts npm
 
-Si una pantalla muestra error de índice, desplegar índices y esperar a que Firebase termine de crearlos.
+| Comando | Descripción |
+|---------|-------------|
+| `npm run dev` | Desarrollo local |
+| `npm run build` | Build producción (+ iconos PWA vía `prebuild`) |
+| `npm run preview` | Previsualizar build |
+| `npm run icons` | Regenerar iconos PWA |
+| `npm run lint` | ESLint |
+| `npm run backup` | Commit y push automático (ver [Versionado Git](#versionado-git)) |
 
 ---
 
-## Estructura del proyecto (resumen)
+## Arquitectura
+
+### Flujo de datos
+
+```mermaid
+flowchart LR
+  U[Usuario / PWA] --> A[Firebase Auth]
+  A --> R[React SPA]
+  R --> F[(Firestore brassurcrm)]
+  R --> S[Storage fotos]
+  R --> H[Firebase Hosting]
+```
+
+- **Auth** → sesión email/contraseña; cierre por inactividad (~6 h).
+- **Firestore** → colecciones de negocio; listeners en tiempo real (`onSnapshot`).
+- **Storage** → imágenes comprimidas en cliente antes de subir.
+- **Hosting** → sirve el bundle estático; rutas del router en el cliente.
+
+### Carpetas principales
 
 ```
-src/
-├── App.jsx                 # Rutas y protección por auth
-├── firebase/firebase.js    # App, Auth, Firestore (brassurcrm), Storage
-├── context/AuthContext.jsx
-├── pages/                  # Una carpeta por módulo
-├── components/             # UI compartida, layout, PWA
-├── services/               # Acceso Firestore (suppliers, photos, timeline…)
-├── utils/                  # Lógica de negocio (followUps, intelligence, compresión…)
-└── constants/              # Rutas, enums, estados de fotos
-public/
-├── icons/                  # PWA
-scripts/
-└── generate-pwa-icons.mjs
+CRM BRASSUR/
+├── public/                 # Estáticos, iconos PWA, manifest
+├── scripts/
+│   └── generate-pwa-icons.mjs
+├── docs/
+│   └── firebase-setup.md   # Configuración Firebase detallada
+├── src/
+│   ├── main.jsx            # Entrada React
+│   ├── App.jsx             # Rutas y guard de autenticación
+│   ├── firebase/
+│   │   └── firebase.js     # App, Auth, Firestore (brassurcrm), Storage
+│   ├── context/
+│   │   └── AuthContext.jsx # Sesión y usuario
+│   ├── constants/          # Rutas, enums, estados (fotos, timeline)
+│   ├── pages/              # Pantallas por módulo
+│   │   ├── Dashboard.jsx
+│   │   ├── Suppliers/
+│   │   ├── Contacts/
+│   │   ├── Activities/
+│   │   ├── Opportunities/
+│   │   ├── FollowUps/
+│   │   ├── WorkCenter/     # Hoy
+│   │   ├── Intelligence/
+│   │   ├── DataQuality/
+│   │   ├── PhotoInbox/
+│   │   └── ImportarProveedores.jsx
+│   ├── components/         # Layout, modales, PWA, fotos, gráficos
+│   ├── services/           # Capa Firestore/Storage (CRUD, suscripciones)
+│   ├── hooks/              # useSuppliers, usePhotoCaptureFlow, etc.
+│   ├── utils/              # Lógica de negocio (inteligencia, followUps, compresión)
+│   └── styles/             # CSS por módulo y variables globales
+├── firebase.json           # Hosting
+├── .firebaserc             # Proyecto y target brassurcrm
+├── firestore.indexes.json  # Índices compuestos
+├── .env.example
+└── package.json
 ```
 
----
+### Capas en `src/`
 
-## Flujo recomendado para el equipo
+| Capa | Responsabilidad |
+|------|-----------------|
+| `pages/` | Orquestación de pantallas y estado de UI |
+| `components/` | UI reutilizable (layout, modales, badges) |
+| `services/` | Lectura/escritura Firebase, suscripciones |
+| `utils/` | Reglas de negocio puras (scores, agrupaciones, Excel) |
+| `constants/` + `context/` | Configuración compartida y auth |
 
-1. **Importar** proveedores base desde Excel.
-2. Revisar **Calidad de Datos** (duplicados y completitud).
-3. Registrar **contactos** y **oportunidades** en fichas clave.
-4. Usar **Hoy** y **Seguimientos** para la rutina diaria.
-5. Subir fotos en **Bandeja de Fotos** en visita y **asignar** al volver.
-6. Consultar **Inteligencia** para priorizar compras y exportar reportes.
+### Colecciones Firestore (referencia)
 
----
-
-## Notas
-
-- La base de datos nombrada `brassurcrm` debe existir en el proyecto Firebase (Firestore multi-database) o configurarse según la consola.
-- No subir `.env` al repositorio; contiene claves del cliente Firebase.
-- Para soporte de índices o reglas, revisar los mensajes en consola del navegador (`[Fotos]`, `[Calidad]`, etc.).
+`suppliers` · `contacts` · `activities` · `purchaseOpportunities` · `timeline` · `visitPhotos` · `workDayProgress`
 
 ---
 
-**CRM BRASSUR** — Gestión comercial de proveedores de materiales reciclables.
+## Roadmap
+
+Fases planificadas o en evaluación (no implementadas salvo indicación):
+
+| Fase | Alcance | Estado |
+|------|---------|--------|
+| **1 — Core CRM** | Proveedores, contactos, actividades, oportunidades, auth, hosting | ✅ Completado |
+| **2 — Operación diaria** | Seguimientos, Hoy, timeline, importador Excel | ✅ Completado |
+| **3 — Analítica y datos** | Inteligencia comercial, calidad de datos, exportaciones | ✅ Completado |
+| **4 — Campo y PWA** | Bandeja de fotos, compresión, asignación, PWA instalable | ✅ Completado |
+| **5 — Roles y permisos** | Perfiles (admin / comercial / solo lectura), reglas Firestore por rol | 🔲 Pendiente |
+| **6 — Notificaciones** | Push o email para seguimientos vencidos y fotos sin asignar | 🔲 Pendiente |
+| **7 — Offline avanzado** | Cola de escrituras y sincronización diferida en visitas | 🔲 Pendiente |
+| **8 — Integraciones** | ERP, balanza, mapas o WhatsApp Business API | 🔲 Pendiente |
+| **9 — Reporting** | Informes programados y dashboards históricos | 🔲 Pendiente |
+
+---
+
+## Versionado Git
+
+El proyecto usa **Git** para respaldo y trazabilidad del código.
+
+### Flujo habitual
+
+```bash
+git status
+git add .
+git commit -m "descripción del cambio"
+git push
+```
+
+### Backup rápido
+
+Script npm que añade todo, commitea con mensaje fijo y hace push:
+
+```bash
+npm run backup
+```
+
+Equivale a:
+
+```text
+git add . && git commit -m 'backup automatico' && git push
+```
+
+**Importante:**
+
+- Falla si no hay cambios que commitear o si no hay remoto configurado.
+- No sustituye commits descriptivos en cambios importantes.
+- No incluir `.env` ni secretos en el repositorio (ver `.gitignore`).
+
+### Buenas prácticas
+
+- Mensajes de commit claros en features y correcciones.
+- Rama principal protegida en el remoto del equipo.
+- Revisar `git diff` antes de `npm run backup`.
+
+---
+
+## Licencia
+
+**Licencia privada — todos los derechos reservados.**
+
+Este software es propiedad de **BRASSUR** (o la entidad titular indicada por el equipo). Uso exclusivo interno.
+
+- Queda **prohibida** la copia, distribución, sublicencia o uso público sin autorización escrita.
+- El código fuente no se publica bajo licencia open source.
+- Terceros no pueden desplegar ni modificar el CRM sin permiso explícito.
+
+Para consultas de uso o transferencia de código, contactar al responsable interno del proyecto.
+
+---
+
+## Referencias rápidas
+
+| Tema | Dónde |
+|------|--------|
+| Firebase (proyecto, índices, errores) | [docs/firebase-setup.md](docs/firebase-setup.md) |
+| Rutas de la app | `src/constants/routes.js` |
+| Inicialización Firebase | `src/firebase/firebase.js` |
+| Fotos de visita | `src/services/visitPhotosService.js` |
+
+---
+
+**CRM BRASSUR** — Gestión comercial de proveedores · Uso interno BRASSUR
