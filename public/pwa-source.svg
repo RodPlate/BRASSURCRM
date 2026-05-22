@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="108" fill="#0f1f1a"/>
+  <rect x="48" y="48" width="416" height="416" rx="88" fill="#1e5f4a"/>
+  <path fill="#c9a227" d="M148 168h216v28H148zm0 72h160v28H148zm0 72h200v28H148z" opacity=".9"/>
+  <text x="256" y="132" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="56" font-weight="700" fill="#ffffff">BRASSUR</text>
+  <text x="256" y="420" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="36" font-weight="600" fill="#b8cfc6">CRM</text>
+</svg>

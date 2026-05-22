@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "crm-brassur"
+  },
+  "targets": {
+    "crm-brassur": {
+      "hosting": {
+        "brassurcrm": [
+          "brassurcrm"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

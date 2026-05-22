@@ -1,0 +1,151 @@
+.dq-status {
+  margin: 0 0 1rem;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.dq-status--ok {
+  color: var(--color-primary);
+}
+
+.data-quality-page .dq-summary {
+  margin-bottom: 1.5rem;
+}
+
+.dq-tier {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.02em;
+}
+
+.dq-tier--a {
+  background: #1e5f4a;
+  color: #fff;
+}
+
+.dq-tier--b {
+  background: #c9a227;
+  color: #0f1f1a;
+}
+
+.dq-tier--c {
+  background: #4a7c9b;
+  color: #fff;
+}
+
+.dq-tier--d {
+  background: #e8ece9;
+  color: var(--color-text-muted);
+}
+
+.dq-completeness {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 100px;
+}
+
+.dq-completeness__bar {
+  flex: 1;
+  height: 6px;
+  background: var(--color-bg);
+  border-radius: 999px;
+  overflow: hidden;
+  max-width: 80px;
+}
+
+.dq-completeness__fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 999px;
+}
+
+.dq-completeness--low .dq-completeness__fill {
+  background: var(--color-danger);
+}
+
+.dq-duplicate-flag {
+  color: var(--color-danger);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.dq-pending-panel {
+  background: #f0f7f4;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.dq-pending-panel h4 {
+  margin: 0 0 0.75rem;
+}
+
+.dq-pending-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.875rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.dq-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.dq-section-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.dq-tab {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.dq-tab--active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.dq-dupes-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.dq-dupes-card h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+}
+
+.dq-dupes-card ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.875rem;
+}
+
+.dq-score {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.row--selected {
+  background: rgba(30, 95, 74, 0.08);
+}
