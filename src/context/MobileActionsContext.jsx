@@ -1,7 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { subscribeSuppliers } from '../services/suppliersService';
 import { subscribeContacts } from '../services/contactsService';
-import FloatingActionButton from '../components/mobile/FloatingActionButton';
 import QuickActivityModal from '../components/mobile/QuickActivityModal';
 import QuickPhotoPickerModal from '../components/mobile/QuickPhotoPickerModal';
 import OpportunityFormModal from '../components/opportunities/OpportunityFormModal';
@@ -61,6 +60,8 @@ export function MobileActionsProvider({ children }) {
     () => ({
       suppliers,
       contacts,
+      fabOpen,
+      setFabOpen,
       openQuickActivity,
       openQuickOpportunity,
       openQuickPhoto,
@@ -71,6 +72,7 @@ export function MobileActionsProvider({ children }) {
     [
       suppliers,
       contacts,
+      fabOpen,
       openQuickActivity,
       openQuickOpportunity,
       openQuickPhoto,
@@ -82,15 +84,6 @@ export function MobileActionsProvider({ children }) {
   return (
     <MobileActionsContext.Provider value={value}>
       {children}
-      <FloatingActionButton
-        open={fabOpen}
-        onToggle={() => setFabOpen((v) => !v)}
-        onClose={() => setFabOpen(false)}
-        onQuickActivity={openQuickActivity}
-        onQuickOpportunity={() => openQuickOpportunity()}
-        onQuickPhoto={() => openQuickPhoto()}
-        onNewSupplier={openNewSupplier}
-      />
       <QuickActivityModal
         open={quickActivityOpen}
         onClose={() => setQuickActivityOpen(false)}

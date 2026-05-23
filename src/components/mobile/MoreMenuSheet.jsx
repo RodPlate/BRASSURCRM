@@ -15,7 +15,7 @@ export default function MoreMenuSheet({ open, onClose, onQuickActivity }) {
         <ul className="sheet__links">
           {MORE_MENU_ITEMS.map((item) => (
             <li key={item.to}>
-              <Link to={item.to} onClick={onClose}>
+              <Link to={item.to} onClick={onClose} role="menuitem">
                 {item.icon} {item.label}
               </Link>
             </li>
