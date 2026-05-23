@@ -1,5 +1,5 @@
+import { useState } from 'react';
 import { ACTIVITY_TYPES } from '../../constants/enums';
-import { toInputDate } from '../../utils/format';
 
 const emptyActivity = {
   supplierId: '',
@@ -17,14 +17,16 @@ export function getEmptyActivity(supplierId = '') {
 
 export function activityToForm(activity) {
   if (!activity) return getEmptyActivity();
+  const dateVal = activity.date?.toDate?.() ?? activity.date;
+  const followVal = activity.nextFollowUpDate?.toDate?.() ?? activity.nextFollowUpDate;
   return {
     supplierId: activity.supplierId || '',
     contactId: activity.contactId || '',
     type: activity.type || 'Llamada',
-    date: toInputDate(activity.date) || new Date().toISOString().split('T')[0],
+    date: dateVal ? new Date(dateVal).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
     summary: activity.summary || '',
     nextAction: activity.nextAction || '',
-    nextFollowUpDate: toInputDate(activity.nextFollowUpDate),
+    nextFollowUpDate: followVal ? new Date(followVal).toISOString().split('T')[0] : '',
   };
 }
 
@@ -34,7 +36,10 @@ export default function ActivityForm({
   suppliers,
   contacts,
   lockSupplier = false,
+  simplified = true,
 }) {
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     const updated = { ...form, [name]: value };
@@ -45,6 +50,78 @@ export default function ActivityForm({
   };
 
   const supplierContacts = contacts.filter((c) => c.supplierId === form.supplierId);
+
+  if (simplified && !showAdvanced) {
+    return (
+      <div className="form-grid">
+        {!lockSupplier && (
+          <div className="form-field form-grid--full">
+            <label htmlFor="supplierId">Proveedor *</label>
+            <select
+              id="supplierId"
+              name="supplierId"
+              value={form.supplierId}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Seleccionar proveedor</option>
+              {suppliers.map((s) => (
+                <option key={s.id} value={s.id}>{s.companyName}</option>
+              ))}
+            </select>
+          </div>
+        )}
+        {lockSupplier && form.supplierId && (
+          <div className="form-field form-grid--full">
+            <label>Proveedor</label>
+            <p className="form-field__locked">
+              {suppliers.find((s) => s.id === form.supplierId)?.companyName || '—'}
+            </p>
+          </div>
+        )}
+        <div className="form-field form-grid--full">
+          <label htmlFor="type">Tipo *</label>
+          <select id="type" name="type" value={form.type} onChange={handleChange} required>
+            {ACTIVITY_TYPES.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+        </div>
+        <div className="form-field form-grid--full">
+          <label htmlFor="summary">Comentario *</label>
+          <textarea
+            id="summary"
+            name="summary"
+            value={form.summary}
+            onChange={handleChange}
+            required
+            rows={3}
+            placeholder="¿Qué pasó en este contacto?"
+            autoFocus={lockSupplier}
+          />
+        </div>
+        <div className="form-field form-grid--full">
+          <label htmlFor="nextFollowUpDate">Próxima fecha (opcional)</label>
+          <input
+            id="nextFollowUpDate"
+            name="nextFollowUpDate"
+            type="date"
+            value={form.nextFollowUpDate}
+            onChange={handleChange}
+          />
+        </div>
+        <div className="form-grid--full form-advanced-toggle">
+          <button
+            type="button"
+            className="btn btn--secondary btn--sm"
+            onClick={() => setShowAdvanced(true)}
+          >
+            ▼ Más opciones
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="form-grid">
@@ -89,19 +166,19 @@ export default function ActivityForm({
         </select>
       </div>
       <div className="form-field">
-        <label htmlFor="type">Tipo de actividad</label>
-        <select id="type" name="type" value={form.type} onChange={handleChange}>
+        <label htmlFor="type">Tipo *</label>
+        <select id="type" name="type" value={form.type} onChange={handleChange} required>
           {ACTIVITY_TYPES.map((t) => (
             <option key={t} value={t}>{t}</option>
           ))}
         </select>
       </div>
       <div className="form-field">
-        <label htmlFor="date">Fecha *</label>
-        <input id="date" name="date" type="date" value={form.date} onChange={handleChange} required />
+        <label htmlFor="date">Fecha</label>
+        <input id="date" name="date" type="date" value={form.date} onChange={handleChange} />
       </div>
       <div className="form-field form-grid--full">
-        <label htmlFor="summary">Resumen *</label>
+        <label htmlFor="summary">Comentario *</label>
         <textarea id="summary" name="summary" value={form.summary} onChange={handleChange} required rows={3} />
       </div>
       <div className="form-field">
@@ -118,6 +195,17 @@ export default function ActivityForm({
           onChange={handleChange}
         />
       </div>
+      {simplified && (
+        <div className="form-grid--full form-advanced-toggle">
+          <button
+            type="button"
+            className="btn btn--secondary btn--sm"
+            onClick={() => setShowAdvanced(false)}
+          >
+            ▲ Modo simple
+          </button>
+        </div>
+      )}
     </div>
   );
 }

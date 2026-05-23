@@ -22,7 +22,7 @@ export default function BarChart({ data, valueKey, labelKey, unit = '', color = 
               />
             </div>
             <span className="bar-chart__value">
-              {value.toLocaleString('es-PE')}{unit}
+              {value.toLocaleString('es-PY')}{unit}
             </span>
           </div>
         );

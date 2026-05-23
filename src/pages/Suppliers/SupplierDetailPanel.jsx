@@ -1,40 +1,25 @@
 import { useMemo, useState } from 'react';
-import { deleteContact, setMainContact } from '../../services/contactsService';
-import { deleteActivity } from '../../services/activitiesService';
 import { deleteOpportunity } from '../../services/opportunitiesService';
-import { formatDate, formatNumber, formatCurrency } from '../../utils/format';
-import { sortByExpectedPurchaseDate, getOpportunityPotentialValue } from '../../utils/opportunities';
 import StatusBadge from '../../components/common/StatusBadge';
 import NegotiationBadge from '../../components/common/NegotiationBadge';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
-import ContactFormModal from '../../components/contacts/ContactFormModal';
-import ActivityFormModal from '../../components/activities/ActivityFormModal';
-import OpportunityFormModal from '../../components/opportunities/OpportunityFormModal';
 import SupplierTimeline from '../../components/suppliers/SupplierTimeline';
 import VisitPhotosSection from '../../components/suppliers/VisitPhotosSection';
+import QuickActivityBar from '../../components/activities/QuickActivityBar';
+import { useMobileActions } from '../../context/MobileActionsContext';
+import { formatDate } from '../../utils/format';
+import { setLastSupplierId } from '../../utils/mobilePrefs';
 
 export default function SupplierDetailPanel({
   supplier,
-  contacts,
   activities,
   opportunities,
-  suppliers,
-  allContacts,
   onClose,
   onEditSupplier,
 }) {
-  const [contactModal, setContactModal] = useState(null);
-  const [activityModal, setActivityModal] = useState(null);
-  const [opportunityModal, setOpportunityModal] = useState(null);
-  const [deleteContactTarget, setDeleteContactTarget] = useState(null);
-  const [deleteActivityTarget, setDeleteActivityTarget] = useState(null);
+  const { openQuickActivity, openQuickOpportunity, openQuickPhoto } = useMobileActions();
   const [deleteOpportunityTarget, setDeleteOpportunityTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
-
-  const supplierContacts = useMemo(
-    () => contacts.filter((c) => c.supplierId === supplier.id),
-    [contacts, supplier.id]
-  );
 
   const supplierActivities = useMemo(
     () =>
@@ -49,44 +34,19 @@ export default function SupplierDetailPanel({
   );
 
   const supplierOpportunities = useMemo(
-    () =>
-      sortByExpectedPurchaseDate(
-        opportunities.filter((o) => o.supplierId === supplier.id),
-        'asc'
-      ),
+    () => opportunities.filter((o) => o.supplierId === supplier.id),
     [opportunities, supplier.id]
   );
 
-  const contactMap = useMemo(
-    () => Object.fromEntries(supplierContacts.map((c) => [c.id, c.name])),
-    [supplierContacts]
-  );
-
+  const lastActivity = supplierActivities[0];
   const visitActivities = useMemo(
     () => supplierActivities.filter((a) => a.type === 'Visita'),
     [supplierActivities]
   );
 
-  const handleDeleteContact = async () => {
-    if (!deleteContactTarget) return;
-    setDeleting(true);
-    try {
-      await deleteContact(deleteContactTarget.id);
-      setDeleteContactTarget(null);
-    } finally {
-      setDeleting(false);
-    }
-  };
-
-  const handleDeleteActivity = async () => {
-    if (!deleteActivityTarget) return;
-    setDeleting(true);
-    try {
-      await deleteActivity(deleteActivityTarget.id);
-      setDeleteActivityTarget(null);
-    } finally {
-      setDeleting(false);
-    }
+  const openWithSupplier = (fn) => {
+    setLastSupplierId(supplier.id);
+    fn(supplier.id);
   };
 
   const handleDeleteOpportunity = async () => {
@@ -100,132 +60,81 @@ export default function SupplierDetailPanel({
     }
   };
 
-  const handleSetMain = async (contact) => {
-    try {
-      await setMainContact(contact);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   return (
     <div className="detail-overlay" onClick={onClose} role="presentation">
-      <div className="detail-panel" onClick={(e) => e.stopPropagation()} role="dialog">
-        <header className="detail-panel__header">
+      <div
+        className="detail-panel detail-panel--simple detail-panel--mobile"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+      >
+        <header className="detail-panel__header detail-panel__header--mobile">
           <div>
             <h2>{supplier.companyName}</h2>
-            <p>
-              {supplier.ruc && `RUC ${supplier.ruc} · `}
-              {supplier.city || 'Sin ciudad'}
-              {supplier.department ? `, ${supplier.department}` : ''}
+            <p className="detail-panel__city">
+              {[supplier.city, supplier.department].filter(Boolean).join(', ') || 'Sin ciudad'}
             </p>
-            <div className="detail-panel__badges">
-              <StatusBadge value={supplier.status} />
-              <StatusBadge value={supplier.priority} type="priority" />
-              <span className="badge badge--inactivo">{supplier.supplierType}</span>
-            </div>
+            <StatusBadge value={supplier.status} />
           </div>
           <button type="button" className="modal__close" onClick={onClose} aria-label="Cerrar">
             ×
           </button>
         </header>
 
-        <div className="detail-panel__summary">
-          <div>
-            <span className="detail-panel__label">Rubro</span>
-            <strong>{supplier.industry || '—'}</strong>
-          </div>
-          <div>
-            <span className="detail-panel__label">Materiales</span>
-            <strong>
-              {Array.isArray(supplier.generatedMaterials)
-                ? supplier.generatedMaterials.join(', ')
-                : supplier.generatedMaterials || '—'}
-            </strong>
-          </div>
-          <div>
-            <span className="detail-panel__label">Volumen est.</span>
-            <strong>{formatNumber(supplier.estimatedMonthlyVolumeKg, ' kg/mes')}</strong>
-          </div>
-          <div>
-            <span className="detail-panel__label">Seguimiento</span>
-            <strong>{formatDate(supplier.nextFollowUpDate)}</strong>
-          </div>
-        </div>
-
-        {supplier.notes && (
-          <p className="detail-panel__notes">{supplier.notes}</p>
-        )}
-
-        <div className="detail-panel__actions-bar">
-          <button type="button" className="btn btn--secondary btn--sm" onClick={() => onEditSupplier(supplier)}>
-            Editar proveedor
+        <div className="mobile-quick-actions">
+          <button
+            type="button"
+            className="mobile-quick-actions__btn"
+            onClick={() => openWithSupplier(openQuickActivity)}
+          >
+            📞 Actividad
           </button>
-          <button type="button" className="btn btn--primary btn--sm" onClick={() => setContactModal('new')}>
-            + Contacto
+          <button
+            type="button"
+            className="mobile-quick-actions__btn"
+            onClick={() => openWithSupplier(openQuickOpportunity)}
+          >
+            🎯 Oportunidad
           </button>
-          <button type="button" className="btn btn--primary btn--sm" onClick={() => setOpportunityModal('new')}>
-            + Oportunidad
-          </button>
-          <button type="button" className="btn btn--primary btn--sm" onClick={() => setActivityModal('new')}>
-            + Actividad
+          <button
+            type="button"
+            className="mobile-quick-actions__btn"
+            onClick={() => openWithSupplier(openQuickPhoto)}
+          >
+            📷 Foto
           </button>
         </div>
 
-        <SupplierTimeline supplierId={supplier.id} />
+        <button
+          type="button"
+          className="btn btn--secondary btn--sm detail-panel__edit-link"
+          onClick={() => onEditSupplier(supplier)}
+        >
+          Editar proveedor
+        </button>
 
-        <VisitPhotosSection
-          supplierId={supplier.id}
-          supplierName={supplier.companyName}
-          visitActivities={visitActivities}
-        />
+        <section className="detail-section detail-section--highlight show-desktop-only">
+          <QuickActivityBar supplierId={supplier.id} />
+        </section>
 
-        <section className="detail-section">
-          <div className="detail-section__header">
-            <h3>Contactos ({supplierContacts.length})</h3>
-          </div>
-          {supplierContacts.length === 0 ? (
-            <div className="empty-state empty-state--compact">
-              <p>Sin contactos registrados.</p>
+        <section className="detail-section detail-section--compact show-mobile-only">
+          <h3 className="detail-section__mini-title">Última actividad</h3>
+          {lastActivity ? (
+            <div className="last-activity-card">
+              <strong>{lastActivity.type}</strong>
+              <span>{formatDate(lastActivity.date)}</span>
+              <p>{lastActivity.summary}</p>
             </div>
           ) : (
-            <ul className="detail-list">
-              {supplierContacts.map((c) => (
-                <li key={c.id} className="detail-list__item">
-                  <div className="detail-list__main">
-                    <strong>
-                      {c.name}
-                      {c.isMainContact && <span className="badge badge--activo detail-list__main-badge">Principal</span>}
-                    </strong>
-                    <span>{c.role || 'Sin rol'} · {c.phone || c.whatsapp || c.email || 'Sin datos'}</span>
-                  </div>
-                  <div className="data-table__actions">
-                    {!c.isMainContact && (
-                      <button type="button" className="btn btn--secondary btn--sm" onClick={() => handleSetMain(c)}>
-                        Principal
-                      </button>
-                    )}
-                    <button type="button" className="btn btn--secondary btn--sm" onClick={() => setContactModal(c)}>
-                      Editar
-                    </button>
-                    <button type="button" className="btn btn--danger btn--sm" onClick={() => setDeleteContactTarget(c)}>
-                      Eliminar
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <p className="text-muted">Sin actividades registradas.</p>
           )}
         </section>
 
         <section className="detail-section">
           <div className="detail-section__header">
-            <h3>Oportunidades de compra ({supplierOpportunities.length})</h3>
+            <h3>Oportunidades ({supplierOpportunities.length})</h3>
           </div>
           {supplierOpportunities.length === 0 ? (
-            <div className="empty-state empty-state--compact">
-              <p>Sin oportunidades registradas.</p>
-            </div>
+            <p className="text-muted">Sin oportunidades.</p>
           ) : (
             <ul className="detail-list">
               {supplierOpportunities.map((o) => (
@@ -235,127 +144,35 @@ export default function SupplierDetailPanel({
                       {o.material}
                       <NegotiationBadge value={o.negotiationStatus} />
                     </strong>
-                    <span>
-                      {formatNumber(o.estimatedVolumeKg, ' kg')}
-                      {' · '}
-                      {formatCurrency(o.targetPrice, o.currency)}
-                      {o.currentOfferPrice > 0 && ` → ${formatCurrency(o.currentOfferPrice, o.currency)}`}
-                    </span>
-                    <small>
-                      Compra est.: {formatDate(o.expectedPurchaseDate)}
-                      {' · '}
-                      Valor pot.: {formatCurrency(getOpportunityPotentialValue(o), o.currency)}
-                      {o.probability != null && ` · ${o.probability}% prob.`}
-                    </small>
+                    {o.notes && <span>{o.notes}</span>}
                   </div>
-                  <div className="data-table__actions">
-                    <button type="button" className="btn btn--secondary btn--sm" onClick={() => setOpportunityModal(o)}>
-                      Editar
-                    </button>
-                    <button type="button" className="btn btn--danger btn--sm" onClick={() => setDeleteOpportunityTarget(o)}>
-                      Eliminar
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    className="btn btn--danger btn--sm"
+                    onClick={() => setDeleteOpportunityTarget(o)}
+                  >
+                    ×
+                  </button>
                 </li>
               ))}
             </ul>
           )}
         </section>
 
-        <section className="detail-section">
-          <div className="detail-section__header">
-            <h3>Historial de actividades ({supplierActivities.length})</h3>
-          </div>
-          {supplierActivities.length === 0 ? (
-            <div className="empty-state empty-state--compact">
-              <p>Sin actividades registradas.</p>
-            </div>
-          ) : (
-            <ul className="detail-list detail-list--activities">
-              {supplierActivities.map((a) => (
-                <li key={a.id} className="detail-list__item detail-list__item--activity">
-                  <div className="detail-list__main">
-                    <strong>
-                      <span className="activity-type">{a.type}</span>
-                      {formatDate(a.date)}
-                    </strong>
-                    <span>{a.summary}</span>
-                    {(a.nextAction || a.nextFollowUpDate) && (
-                      <small>
-                        {a.nextAction && `Acción: ${a.nextAction}`}
-                        {a.nextAction && a.nextFollowUpDate && ' · '}
-                        {a.nextFollowUpDate && `Seguimiento: ${formatDate(a.nextFollowUpDate)}`}
-                      </small>
-                    )}
-                    {a.contactId && <small>Contacto: {contactMap[a.contactId]}</small>}
-                  </div>
-                  <div className="data-table__actions">
-                    <button type="button" className="btn btn--secondary btn--sm" onClick={() => setActivityModal(a)}>
-                      Editar
-                    </button>
-                    <button type="button" className="btn btn--danger btn--sm" onClick={() => setDeleteActivityTarget(a)}>
-                      Eliminar
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+        <VisitPhotosSection
+          supplierId={supplier.id}
+          supplierName={supplier.companyName}
+          visitActivities={visitActivities}
+        />
+
+        <SupplierTimeline supplierId={supplier.id} />
+
       </div>
-
-      <ContactFormModal
-        open={contactModal !== null}
-        onClose={() => setContactModal(null)}
-        contact={contactModal === 'new' ? null : contactModal}
-        defaultSupplierId={supplier.id}
-        suppliers={suppliers}
-        lockSupplier
-      />
-
-      <ActivityFormModal
-        open={activityModal !== null}
-        onClose={() => setActivityModal(null)}
-        activity={activityModal === 'new' ? null : activityModal}
-        defaultSupplierId={supplier.id}
-        suppliers={suppliers}
-        contacts={allContacts}
-        lockSupplier
-      />
-
-      <OpportunityFormModal
-        open={opportunityModal !== null}
-        onClose={() => setOpportunityModal(null)}
-        opportunity={opportunityModal === 'new' ? null : opportunityModal}
-        defaultSupplierId={supplier.id}
-        suppliers={suppliers}
-        lockSupplier
-      />
-
-      {deleteContactTarget && (
-        <ConfirmDialog
-          title="Eliminar contacto"
-          message={`¿Eliminar "${deleteContactTarget.name}"?`}
-          onConfirm={handleDeleteContact}
-          onCancel={() => setDeleteContactTarget(null)}
-          loading={deleting}
-        />
-      )}
-
-      {deleteActivityTarget && (
-        <ConfirmDialog
-          title="Eliminar actividad"
-          message="¿Eliminar esta actividad del historial?"
-          onConfirm={handleDeleteActivity}
-          onCancel={() => setDeleteActivityTarget(null)}
-          loading={deleting}
-        />
-      )}
 
       {deleteOpportunityTarget && (
         <ConfirmDialog
           title="Eliminar oportunidad"
-          message={`¿Eliminar la oportunidad de "${deleteOpportunityTarget.material}"?`}
+          message={`¿Eliminar "${deleteOpportunityTarget.material}"?`}
           onConfirm={handleDeleteOpportunity}
           onCancel={() => setDeleteOpportunityTarget(null)}
           loading={deleting}

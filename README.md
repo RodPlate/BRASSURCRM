@@ -39,6 +39,7 @@ Acceso protegido con Firebase Authentication (email y contraseña). Sin sesión 
 | **Storage** | Fotos de visitas |
 | **Firebase Auth** | Login email / contraseña |
 | **PWA** | `vite-plugin-pwa`, instalable en móvil y escritorio |
+| **Capacitor** 8 | APK Android interna (`android/`, mismo `src/`) |
 | React Router 7 | Navegación SPA |
 | `xlsx` | Importación y exportación Excel |
 
@@ -132,6 +133,85 @@ Definidos en `firestore.indexes.json` (`timeline`, `visitPhotos`).
 | `npm run icons` | Regenerar iconos PWA |
 | `npm run lint` | ESLint |
 | `npm run backup` | Commit y push automático (ver [Versionado Git](#versionado-git)) |
+| `npm run cap:sync` | Build web + copiar `dist/` a Android |
+| `npm run cap:open` | Abrir proyecto en Android Studio |
+| `npm run cap:android` | Build + sync + abrir Android Studio |
+| `npm run cap:icons` | Regenerar iconos launcher desde logo Brassur |
+
+---
+
+## APK Android (Capacitor)
+
+App nativa Android que empaqueta el mismo build web (`dist/`). **No duplica** `src/`: React + Vite + Firebase siguen siendo la fuente única. La PWA y Firebase Hosting no se modifican.
+
+| Campo | Valor |
+|--------|--------|
+| **appId** | `com.brassur.crm` |
+| **appName** | CRM BRASSUR |
+| **webDir** | `dist` |
+| **Config** | `capacitor.config.ts` |
+
+### Requisitos
+
+- [Android Studio](https://developer.android.com/studio) (SDK + JDK incluidos)
+- Node.js 18+ y dependencias del proyecto (`npm install`)
+
+### Primera vez (ya configurado en el repo)
+
+```bash
+npm install
+npm run build
+npx cap add android    # solo si no existe carpeta android/
+npx cap sync android
+npm run cap:icons      # icono launcher desde logo Brassur
+```
+
+### Flujo habitual (generar / actualizar APK)
+
+```bash
+npm run build
+npx cap sync android
+npx cap open android
+```
+
+En Android Studio:
+
+1. Esperar sincronización Gradle.
+2. **Build → Build Bundle(s) / APK(s) → Build APK(s)**.
+3. APK de debug: `android/app/build/outputs/apk/debug/app-debug.apk`.
+
+Para APK de **release** (distribución interna): configurar firma en Android Studio (*Build → Generate Signed Bundle / APK*).
+
+### Scripts npm (Android)
+
+Equivalente al flujo anterior:
+
+```bash
+npm run cap:sync    # npm run build && npx cap sync android
+npm run cap:open    # npx cap open android
+npm run cap:android # build + sync + abrir IDE
+```
+
+### Permisos Android (`AndroidManifest.xml`)
+
+- `INTERNET` — Firebase Auth, Firestore, Storage, Hosting.
+- `CAMERA` — fotos de visita desde la WebView (`capture` en bandeja / ficha).
+- `READ_MEDIA_IMAGES` / `READ_EXTERNAL_STORAGE` (API ≤32) — galería al elegir imagen.
+
+### Icono de la app
+
+Generado desde `public/icons/icon-512.png` (logo Brassur):
+
+```bash
+npm run cap:icons
+npx cap sync android
+```
+
+### Notas
+
+- `vite.config.js` usa `base: './'` para que los assets carguen en el WebView de Capacitor; sigue siendo compatible con `firebase deploy --only hosting`.
+- Tras cambios en React, siempre: **`npm run build`** y luego **`npx cap sync android`** antes de compilar el APK.
+- La carpeta `android/` es el proyecto Gradle; conviene versionarla en git (excluir `android/**/build/`).
 
 ---
 
@@ -288,6 +368,7 @@ Para consultas de uso o transferencia de código, contactar al responsable inter
 | Tema | Dónde |
 |------|--------|
 | Firebase (proyecto, índices, errores) | [docs/firebase-setup.md](docs/firebase-setup.md) |
+| APK Android (Capacitor) | [docs/android-apk.md](docs/android-apk.md) |
 | Rutas de la app | `src/constants/routes.js` |
 | Inicialización Firebase | `src/firebase/firebase.js` |
 | Fotos de visita | `src/services/visitPhotosService.js` |

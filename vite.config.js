@@ -3,13 +3,14 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  // Rutas relativas: necesario para Capacitor (APK). Compatible con Firebase Hosting.
+  base: './',
   plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: [
-        'favicon.svg',
-        'pwa-source.svg',
+        'logo/logo.png',
         'icons/icon-192.png',
         'icons/icon-512.png',
         'icons/apple-touch-icon.png',
@@ -17,16 +18,16 @@ export default defineConfig({
       ],
       manifest: {
         name: 'CRM BRASSUR',
-        short_name: 'BRASSUR CRM',
+        short_name: 'BRASSUR',
         description: 'CRM interno para gestión de proveedores de Brassur',
-        start_url: '/',
-        scope: '/',
+        start_url: './',
+        scope: './',
         display: 'standalone',
         orientation: 'portrait',
         lang: 'es',
         dir: 'ltr',
-        theme_color: '#0f172a',
-        background_color: '#0f172a',
+        theme_color: '#052E16',
+        background_color: '#FFFFFF',
         categories: ['business', 'productivity'],
         icons: [
           {
@@ -57,7 +58,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,woff2}'],
-        navigateFallback: 'index.html',
+        navigateFallback: './index.html',
+        navigateFallbackDenylist: [/^\/api\//],
         cleanupOutdatedCaches: true,
         runtimeCaching: [
           {

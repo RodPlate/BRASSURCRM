@@ -1,5 +1,5 @@
 .work-center-page .work-center-greeting {
-  background: linear-gradient(135deg, #0f172a 0%, #1e5f4a 100%);
+  background: linear-gradient(135deg, #052e16 0%, #00853f 100%);
   color: #fff;
   border-radius: var(--radius-lg);
   padding: 1.25rem 1.5rem;
@@ -78,7 +78,7 @@
 
 .work-center-section--today .work-center-section__head {
   background: rgba(201, 162, 39, 0.15);
-  border-bottom: 2px solid #c9a227;
+  border-bottom: 2px solid var(--color-accent);
   color: #7a5f00;
 }
 

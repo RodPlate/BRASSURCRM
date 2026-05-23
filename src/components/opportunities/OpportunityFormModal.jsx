@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createOpportunity, updateOpportunity } from '../../services/opportunitiesService';
+import { setLastSupplierId } from '../../utils/mobilePrefs';
 import Modal from '../common/Modal';
 import OpportunityForm, { getEmptyOpportunity, opportunityToForm } from '../../pages/Opportunities/OpportunityForm';
 
@@ -41,6 +42,7 @@ export default function OpportunityFormModal({
       } else {
         await createOpportunity(payload);
       }
+      if (form.supplierId) setLastSupplierId(form.supplierId);
       onClose(true);
     } catch (err) {
       setError(err.message || 'Error al guardar la oportunidad.');
@@ -51,7 +53,7 @@ export default function OpportunityFormModal({
 
   return (
     <Modal
-      title={opportunity?.id ? 'Editar oportunidad' : 'Nueva oportunidad de compra'}
+      title={opportunity?.id ? 'Editar oportunidad' : 'Nueva oportunidad'}
       onClose={() => onClose(false)}
       wide
       footer={

@@ -1,4 +1,5 @@
 import { useAuth } from '../../context/AuthContext';
+import BrandLogo from '../common/BrandLogo';
 
 export default function Topbar({ title, subtitle, onMenuToggle, menuOpen }) {
   const { user, logout } = useAuth();
@@ -24,7 +25,8 @@ export default function Topbar({ title, subtitle, onMenuToggle, menuOpen }) {
         >
           <span className="topbar__menu-icon" aria-hidden="true" />
         </button>
-        <div>
+        <BrandLogo variant="topbar" />
+        <div className="topbar__titles">
           <h2 className="topbar__title">{title}</h2>
           {subtitle && <p className="topbar__subtitle">{subtitle}</p>}
         </div>

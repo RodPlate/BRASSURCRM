@@ -1,7 +1,7 @@
 {
   "id": "/",
   "name": "CRM BRASSUR",
-  "short_name": "BRASSUR CRM",
+  "short_name": "BRASSUR",
   "description": "CRM interno para gestión de proveedores de Brassur",
   "start_url": "/",
   "scope": "/",
@@ -9,8 +9,8 @@
   "orientation": "portrait",
   "lang": "es",
   "dir": "ltr",
-  "theme_color": "#0f172a",
-  "background_color": "#0f172a",
+  "theme_color": "#052E16",
+  "background_color": "#FFFFFF",
   "categories": ["business", "productivity"],
   "icons": [
     {

@@ -1,12 +1,17 @@
 import { NavLink } from 'react-router-dom';
 import { NAV_ITEMS, ROUTES } from '../../constants/routes';
+import { BRAND_TAGLINE, BRAND_TITLE } from '../../constants/branding';
+import BrandLogo from '../common/BrandLogo';
 
 export default function Sidebar({ mobileOpen = false, onNavigate }) {
   return (
     <aside className={`sidebar ${mobileOpen ? 'sidebar--open' : ''}`}>
       <div className="sidebar__brand">
-        <h1>CRM BRASSUR</h1>
-        <span>Proveedores metálicos</span>
+        <div className="sidebar__logo-wrap">
+          <BrandLogo variant="sidebar" />
+        </div>
+        <p className="sidebar__brand-title">{BRAND_TITLE}</p>
+        <p className="sidebar__brand-tagline">{BRAND_TAGLINE}</p>
       </div>
       <nav className="sidebar__nav" aria-label="Menú principal">
         {NAV_ITEMS.map((item) => (
@@ -29,7 +34,9 @@ export default function Sidebar({ mobileOpen = false, onNavigate }) {
           </NavLink>
         ))}
       </nav>
-      <div className="sidebar__footer">CRM BRASSUR</div>
+      <div className="sidebar__footer">
+        <BrandLogo variant="topbar" className="sidebar__footer-logo" />
+      </div>
     </aside>
   );
 }

@@ -1,10 +1,11 @@
+import { useState } from 'react';
+import { toInputDate } from '../../utils/format';
 import {
   SUPPLIER_TYPES,
   SUPPLIER_STATUSES,
   PRIORITIES,
   SOURCES,
 } from '../../constants/enums';
-import { toInputDate } from '../../utils/format';
 
 const emptySupplier = {
   companyName: '',
@@ -48,6 +49,8 @@ export function supplierToForm(supplier) {
 }
 
 export default function SupplierForm({ form, onChange }) {
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     onChange({ ...form, [name]: value });
@@ -63,23 +66,8 @@ export default function SupplierForm({ form, onChange }) {
           value={form.companyName}
           onChange={handleChange}
           required
+          autoFocus
         />
-      </div>
-      <div className="form-field">
-        <label htmlFor="ruc">RUC</label>
-        <input id="ruc" name="ruc" value={form.ruc} onChange={handleChange} />
-      </div>
-      <div className="form-field">
-        <label htmlFor="supplierType">Tipo de proveedor</label>
-        <select id="supplierType" name="supplierType" value={form.supplierType} onChange={handleChange}>
-          {SUPPLIER_TYPES.map((t) => (
-            <option key={t} value={t}>{t}</option>
-          ))}
-        </select>
-      </div>
-      <div className="form-field">
-        <label htmlFor="industry">Rubro / Industria</label>
-        <input id="industry" name="industry" value={form.industry} onChange={handleChange} />
       </div>
       <div className="form-field">
         <label htmlFor="city">Ciudad</label>
@@ -88,6 +76,10 @@ export default function SupplierForm({ form, onChange }) {
       <div className="form-field">
         <label htmlFor="department">Departamento</label>
         <input id="department" name="department" value={form.department} onChange={handleChange} />
+      </div>
+      <div className="form-field form-grid--full">
+        <label htmlFor="industry">Rubro / Industria</label>
+        <input id="industry" name="industry" value={form.industry} onChange={handleChange} />
       </div>
       <div className="form-field form-grid--full">
         <label htmlFor="generatedMaterials">Materiales que genera</label>
@@ -100,17 +92,6 @@ export default function SupplierForm({ form, onChange }) {
         />
       </div>
       <div className="form-field">
-        <label htmlFor="estimatedMonthlyVolumeKg">Volumen mensual est. (kg)</label>
-        <input
-          id="estimatedMonthlyVolumeKg"
-          name="estimatedMonthlyVolumeKg"
-          type="number"
-          min="0"
-          value={form.estimatedMonthlyVolumeKg}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="form-field">
         <label htmlFor="status">Estado</label>
         <select id="status" name="status" value={form.status} onChange={handleChange}>
           {SUPPLIER_STATUSES.map((s) => (
@@ -118,36 +99,74 @@ export default function SupplierForm({ form, onChange }) {
           ))}
         </select>
       </div>
-      <div className="form-field">
-        <label htmlFor="priority">Prioridad</label>
-        <select id="priority" name="priority" value={form.priority} onChange={handleChange}>
-          {PRIORITIES.map((p) => (
-            <option key={p} value={p}>{p}</option>
-          ))}
-        </select>
-      </div>
-      <div className="form-field">
-        <label htmlFor="source">Origen</label>
-        <select id="source" name="source" value={form.source} onChange={handleChange}>
-          {SOURCES.map((s) => (
-            <option key={s} value={s}>{s}</option>
-          ))}
-        </select>
-      </div>
-      <div className="form-field">
-        <label htmlFor="nextFollowUpDate">Próximo seguimiento</label>
-        <input
-          id="nextFollowUpDate"
-          name="nextFollowUpDate"
-          type="date"
-          value={form.nextFollowUpDate}
-          onChange={handleChange}
-        />
-      </div>
       <div className="form-field form-grid--full">
         <label htmlFor="notes">Notas</label>
-        <textarea id="notes" name="notes" value={form.notes} onChange={handleChange} rows={3} />
+        <textarea id="notes" name="notes" value={form.notes} onChange={handleChange} rows={2} />
       </div>
+
+      <div className="form-grid--full form-advanced-toggle">
+        <button
+          type="button"
+          className="btn btn--secondary btn--sm"
+          onClick={() => setShowAdvanced((v) => !v)}
+        >
+          {showAdvanced ? '▲ Ocultar avanzado' : '▼ Modo avanzado'}
+        </button>
+      </div>
+
+      {showAdvanced && (
+        <>
+          <div className="form-field">
+            <label htmlFor="ruc">RUC</label>
+            <input id="ruc" name="ruc" value={form.ruc} onChange={handleChange} />
+          </div>
+          <div className="form-field">
+            <label htmlFor="supplierType">Tipo de proveedor</label>
+            <select id="supplierType" name="supplierType" value={form.supplierType} onChange={handleChange}>
+              {SUPPLIER_TYPES.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
+          <div className="form-field">
+            <label htmlFor="estimatedMonthlyVolumeKg">Volumen mensual est. (kg)</label>
+            <input
+              id="estimatedMonthlyVolumeKg"
+              name="estimatedMonthlyVolumeKg"
+              type="number"
+              min="0"
+              value={form.estimatedMonthlyVolumeKg}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-field">
+            <label htmlFor="priority">Prioridad</label>
+            <select id="priority" name="priority" value={form.priority} onChange={handleChange}>
+              {PRIORITIES.map((p) => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+          </div>
+          <div className="form-field">
+            <label htmlFor="source">Origen</label>
+            <select id="source" name="source" value={form.source} onChange={handleChange}>
+              {SOURCES.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
+          <div className="form-field">
+            <label htmlFor="nextFollowUpDate">Próximo seguimiento</label>
+            <input
+              id="nextFollowUpDate"
+              name="nextFollowUpDate"
+              type="date"
+              value={form.nextFollowUpDate}
+              onChange={handleChange}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }

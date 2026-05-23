@@ -65,7 +65,7 @@ export const filterTimelineEvents = (events, { period = '', typeGroup = '', user
 export const formatTimelineDay = (value) => {
   const d = parseTimelineDate(value);
   if (!d) return '—';
-  return d.toLocaleDateString('es-PE', {
+  return d.toLocaleDateString('es-PY', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',

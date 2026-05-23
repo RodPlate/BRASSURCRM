@@ -17,6 +17,9 @@ import ConfirmDialog from '../../components/common/ConfirmDialog';
 import StatusBadge from '../../components/common/StatusBadge';
 import SupplierForm, { getEmptySupplier, supplierToForm } from './SupplierForm';
 import SupplierDetailPanel from './SupplierDetailPanel';
+import ActivityFormModal from '../../components/activities/ActivityFormModal';
+import OpportunityFormModal from '../../components/opportunities/OpportunityFormModal';
+import QuickPhotoModal from '../../components/photos/QuickPhotoModal';
 
 export default function SuppliersPage() {
   const [suppliers, setSuppliers] = useState([]);
@@ -34,6 +37,9 @@ export default function SuppliersPage() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [detailSupplier, setDetailSupplier] = useState(null);
+  const [quickActivitySupplier, setQuickActivitySupplier] = useState(null);
+  const [quickOpportunitySupplier, setQuickOpportunitySupplier] = useState(null);
+  const [quickPhotoSupplier, setQuickPhotoSupplier] = useState(null);
 
   useEffect(() => {
     const unsubs = [
@@ -106,11 +112,10 @@ export default function SuppliersPage() {
     setError('');
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const saveSupplier = async () => {
     if (!form.companyName.trim()) {
       setError('La razón social es obligatoria.');
-      return;
+      return false;
     }
     setSaving(true);
     setError('');
@@ -126,11 +131,22 @@ export default function SuppliersPage() {
         await createSupplier(payload);
       }
       closeModal();
+      return true;
     } catch (err) {
       setError(err.message || 'Error al guardar el proveedor.');
+      return false;
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await saveSupplier();
+  };
+
+  const handleQuickSave = async () => {
+    await saveSupplier();
   };
 
   const handleDelete = async () => {
@@ -223,19 +239,33 @@ export default function SuppliersPage() {
                   <td>{opportunityCountBySupplier[s.id] || 0}</td>
                   <td>{formatDate(s.nextFollowUpDate)}</td>
                   <td>
-                    <div className="data-table__actions">
-                      <button type="button" className="btn btn--primary btn--sm" onClick={() => setDetailSupplier(s)}>
-                        Ficha
-                      </button>
-                      <button type="button" className="btn btn--secondary btn--sm" onClick={() => openEdit(s)}>
-                        Editar
+                    <div className="data-table__actions data-table__actions--wrap">
+                      <button
+                        type="button"
+                        className="btn btn--secondary btn--sm"
+                        title="Registrar actividad"
+                        onClick={() => setQuickActivitySupplier(s)}
+                      >
+                        + Actividad
                       </button>
                       <button
                         type="button"
-                        className="btn btn--danger btn--sm"
-                        onClick={() => setDeleteTarget(s)}
+                        className="btn btn--secondary btn--sm"
+                        title="Nueva oportunidad"
+                        onClick={() => setQuickOpportunitySupplier(s)}
                       >
-                        Eliminar
+                        + Oportunidad
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn--secondary btn--sm"
+                        title="Subir foto"
+                        onClick={() => setQuickPhotoSupplier(s)}
+                      >
+                        📷 Foto
+                      </button>
+                      <button type="button" className="btn btn--primary btn--sm" onClick={() => setDetailSupplier(s)}>
+                        Ficha
                       </button>
                     </div>
                   </td>
@@ -249,13 +279,13 @@ export default function SuppliersPage() {
       {detailSupplier && (
         <SupplierDetailPanel
           supplier={detailSupplier}
-          contacts={contacts}
           activities={activities}
           opportunities={opportunities}
-          suppliers={suppliers}
-          allContacts={contacts}
           onClose={() => setDetailSupplier(null)}
-          onEditSupplier={openEdit}
+          onEditSupplier={(s) => {
+            setDetailSupplier(null);
+            openEdit(s);
+          }}
         />
       )}
 
@@ -269,8 +299,18 @@ export default function SuppliersPage() {
               <button type="button" className="btn btn--secondary" onClick={closeModal} disabled={saving}>
                 Cancelar
               </button>
+              {!editingId && (
+                <button
+                  type="button"
+                  className="btn btn--accent"
+                  onClick={handleQuickSave}
+                  disabled={saving}
+                >
+                  {saving ? 'Guardando…' : 'Guardar rápido'}
+                </button>
+              )}
               <button type="submit" form="supplier-form" className="btn btn--primary" disabled={saving}>
-                {saving ? 'Guardando…' : editingId ? 'Actualizar' : 'Crear'}
+                {saving ? 'Guardando…' : editingId ? 'Actualizar' : 'Guardar'}
               </button>
             </>
           }
@@ -281,6 +321,29 @@ export default function SuppliersPage() {
           </form>
         </Modal>
       )}
+
+      <ActivityFormModal
+        open={!!quickActivitySupplier}
+        onClose={() => setQuickActivitySupplier(null)}
+        defaultSupplierId={quickActivitySupplier?.id || ''}
+        suppliers={suppliers}
+        contacts={contacts}
+        lockSupplier
+      />
+
+      <OpportunityFormModal
+        open={!!quickOpportunitySupplier}
+        onClose={() => setQuickOpportunitySupplier(null)}
+        defaultSupplierId={quickOpportunitySupplier?.id || ''}
+        suppliers={suppliers}
+        lockSupplier
+      />
+
+      <QuickPhotoModal
+        open={!!quickPhotoSupplier}
+        supplier={quickPhotoSupplier}
+        onClose={() => setQuickPhotoSupplier(null)}
+      />
 
       {deleteTarget && (
         <ConfirmDialog

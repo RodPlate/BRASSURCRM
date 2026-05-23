@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import BrandLogo from '../common/BrandLogo';
 
 const DISMISS_KEY = 'pwa-install-dismissed';
 
@@ -58,6 +59,7 @@ export default function InstallPrompt() {
 
   return (
     <div className="pwa-install" role="region" aria-label="Instalar CRM BRASSUR">
+      <BrandLogo variant="pwa" className="pwa-install__logo" />
       <div className="pwa-install__content">
         <strong>Instalar CRM BRASSUR</strong>
         {deferredPrompt ? (

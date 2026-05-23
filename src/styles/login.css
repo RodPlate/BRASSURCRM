@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: center;
   padding: 2rem 1rem;
-  background: linear-gradient(160deg, #0f1f1a 0%, #1e5f4a 55%, #0f1f1a 100%);
+  background: linear-gradient(160deg, #052e16 0%, #00853f 55%, #052e16 100%);
 }
 
 .login-card {
@@ -21,10 +21,18 @@
   margin-bottom: 1.75rem;
 }
 
+.login-card__logo-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
 .login-card__brand h1 {
   margin: 0;
-  font-size: 1.5rem;
-  color: var(--color-primary);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  letter-spacing: 0.03em;
 }
 
 .login-card__brand p {
@@ -43,7 +51,7 @@
 }
 
 .alert--warning {
-  background: rgba(201, 162, 39, 0.15);
-  border: 1px solid rgba(201, 162, 39, 0.45);
+  background: rgba(235, 207, 59, 0.2);
+  border: 1px solid rgba(235, 207, 59, 0.55);
   color: var(--color-text);
 }

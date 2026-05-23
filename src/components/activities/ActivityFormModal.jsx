@@ -26,16 +26,19 @@ export default function ActivityFormModal({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.supplierId || !form.summary.trim() || !form.date) {
-      setError('Proveedor, fecha y resumen son obligatorios.');
+    if (!form.supplierId || !form.summary.trim()) {
+      setError('Proveedor y comentario son obligatorios.');
       return;
     }
     setSaving(true);
     setError('');
     try {
+      const today = new Date().toISOString().split('T')[0];
       const payload = {
         ...form,
+        date: form.date || today,
         contactId: form.contactId || null,
+        nextAction: form.nextAction || '',
         nextFollowUpDate: form.nextFollowUpDate || null,
       };
       if (activity?.id) {
@@ -53,7 +56,7 @@ export default function ActivityFormModal({
 
   return (
     <Modal
-      title={activity?.id ? 'Editar actividad' : 'Nueva actividad'}
+      title={activity?.id ? 'Editar actividad' : 'Registrar actividad'}
       onClose={() => onClose(false)}
       wide
       footer={

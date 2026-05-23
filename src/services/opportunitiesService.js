@@ -8,6 +8,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase/firebase';
 import { auditFieldsForCreate, auditFieldsForUpdate } from '../utils/auditFields';
+import { DEFAULT_CURRENCY, normalizeCurrency } from '../utils/currency';
 import {
   logOpportunityCreated,
   logOpportunityStatusChanged,
@@ -25,14 +26,23 @@ const normalizePayload = (data) => ({
     ? null
     : Math.min(100, Math.max(0, Number(data.probability))),
   expectedPurchaseDate: data.expectedPurchaseDate || null,
-  currency: data.currency || 'PEN',
+  currency: normalizeCurrency(data.currency || DEFAULT_CURRENCY),
 });
 
 export const subscribeOpportunities = (callback, onError) => {
   return onSnapshot(
     collection(db, COLLECTION),
     (snapshot) => {
-      callback(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
+      callback(
+        snapshot.docs.map((d) => {
+          const data = d.data();
+          return {
+            id: d.id,
+            ...data,
+            currency: normalizeCurrency(data.currency),
+          };
+        })
+      );
     },
     (error) => {
       console.error('[opportunities] onSnapshot:', error);

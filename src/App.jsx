@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Layout from './components/layout/Layout';
 import LoginPage from './pages/Login/LoginPage';
@@ -45,7 +45,8 @@ function AppRoutes() {
       <InactivityWatcher />
       <Routes>
       <Route path="/" element={<Layout />}>
-        <Route index element={<Dashboard />} />
+        <Route index element={<Navigate to={ROUTES.today} replace />} />
+        <Route path="dashboard" element={<Dashboard />} />
         <Route path="fotos" element={<PhotoInboxPage />} />
         <Route path="hoy" element={<HoyPage />} />
         <Route path="proveedores" element={<SuppliersPage />} />
@@ -65,10 +66,10 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <AuthProvider>
         <AppRoutes />
       </AuthProvider>
-    </BrowserRouter>
+    </HashRouter>
   );
 }

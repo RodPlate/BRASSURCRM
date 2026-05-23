@@ -21,6 +21,7 @@ import NegotiationBadge from '../../components/common/NegotiationBadge';
 import RescheduleModal from '../../components/followups/RescheduleModal';
 import ActivityFormModal from '../../components/activities/ActivityFormModal';
 import SupplierDetailPanel from '../Suppliers/SupplierDetailPanel';
+import { useMobileActions } from '../../context/MobileActionsContext';
 
 const REQUIRED_SOURCES = ['suppliers', 'activities', 'opportunities'];
 
@@ -116,6 +117,7 @@ function FollowUpTable({ items, supplierMap, onComplete, onReschedule, onNewActi
 }
 
 export default function FollowUpsPage() {
+  const { openEditSupplier } = useMobileActions();
   const [suppliers, setSuppliers] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [activities, setActivities] = useState([]);
@@ -426,13 +428,13 @@ export default function FollowUpsPage() {
       {detailSupplier && (
         <SupplierDetailPanel
           supplier={detailSupplier}
-          contacts={contacts}
           activities={activities}
           opportunities={opportunities}
-          suppliers={suppliers}
-          allContacts={contacts}
           onClose={() => setDetailSupplier(null)}
-          onEditSupplier={() => setDetailSupplier(null)}
+          onEditSupplier={(s) => {
+            setDetailSupplier(null);
+            openEditSupplier(s);
+          }}
         />
       )}
     </div>

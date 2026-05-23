@@ -47,6 +47,16 @@
   background: var(--color-primary-light);
 }
 
+.btn--accent {
+  background: var(--color-accent);
+  color: var(--color-primary-dark);
+  font-weight: 600;
+}
+
+.btn--accent:hover {
+  filter: brightness(0.96);
+}
+
 .btn--secondary {
   background: var(--color-surface);
   color: var(--color-text);
@@ -165,6 +175,67 @@
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
+}
+
+.form-advanced-toggle {
+  margin-top: 0.25rem;
+}
+
+.quick-activity-bar {
+  padding: 0.75rem 0;
+}
+
+.quick-activity-bar__label {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.quick-activity-bar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.quick-activity-bar__btn {
+  white-space: nowrap;
+}
+
+.quick-activity-bar__error {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  color: var(--color-danger);
+}
+
+.detail-section--highlight {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0 1rem 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.detail-panel__actions-bar--compact {
+  margin-bottom: 0.5rem;
+}
+
+.data-table__actions--wrap {
+  flex-wrap: wrap;
+  max-width: 220px;
+}
+
+.card-grid--dashboard {
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+}
+
+.dashboard-currency-totals {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  align-items: flex-start;
 }
 
 .stat-card__hint {
@@ -591,6 +662,35 @@
   font-weight: 600;
 }
 
+.brand-logo {
+  display: block;
+  object-fit: contain;
+}
+
+.brand-logo--sidebar {
+  width: 180px;
+  max-width: 100%;
+  height: auto;
+}
+
+.brand-logo--topbar {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.brand-logo--login {
+  width: 220px;
+  max-width: 100%;
+  height: auto;
+}
+
+.brand-logo--pwa {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+}
+
 .pwa-install {
   display: flex;
   flex-wrap: wrap;
@@ -599,9 +699,15 @@
   gap: 1rem;
   padding: 1rem 1.25rem;
   margin-bottom: 1.25rem;
-  background: linear-gradient(135deg, #f0f7f4 0%, #fff 100%);
+  background: linear-gradient(135deg, #f0faf4 0%, #fff 100%);
   border: 1px solid var(--color-primary);
   border-radius: var(--radius-lg);
+}
+
+.pwa-install__logo {
+  border-radius: var(--radius-sm);
+  background: #fff;
+  padding: 0.25rem;
 }
 
 .pwa-install__content p {

@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import BrandLogo from '../../components/common/BrandLogo';
+import { BRAND_TITLE } from '../../constants/branding';
 import '../../styles/login.css';
 
 const AUTH_ERRORS = {
@@ -40,7 +42,10 @@ export default function LoginPage() {
     <div className="login-page">
       <div className="login-card">
         <div className="login-card__brand">
-          <h1>CRM BRASSUR</h1>
+          <div className="login-card__logo-wrap">
+            <BrandLogo variant="login" />
+          </div>
+          <h1>{BRAND_TITLE}</h1>
           <p>Acceso para usuarios autorizados</p>
         </div>
 

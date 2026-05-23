@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
+import BottomNav from '../mobile/BottomNav';
 import InstallPrompt from '../pwa/InstallPrompt';
 import OfflineBanner from '../pwa/OfflineBanner';
+import { MobileActionsProvider } from '../../context/MobileActionsContext';
 import { ROUTES } from '../../constants/routes';
+import { setLastPath } from '../../utils/mobilePrefs';
 
 const pageMeta = {
   [ROUTES.dashboard]: {
@@ -58,31 +61,40 @@ export default function Layout() {
   const meta = pageMeta[pathname] || { title: 'CRM BRASSUR', subtitle: '' };
   const [menuOpen, setMenuOpen] = useState(false);
 
+  useEffect(() => {
+    console.log('Sección actual:', pathname);
+    setLastPath(pathname);
+  }, [pathname]);
+
   const closeMenu = () => setMenuOpen(false);
+  const hideTopbarTitle = pathname === ROUTES.today;
 
   return (
-    <div className="app-layout">
-      <OfflineBanner />
-      <button
-        type="button"
-        className={`sidebar-backdrop ${menuOpen ? 'sidebar-backdrop--visible' : ''}`}
-        aria-hidden={!menuOpen}
-        tabIndex={menuOpen ? 0 : -1}
-        onClick={closeMenu}
-      />
-      <Sidebar mobileOpen={menuOpen} onNavigate={closeMenu} />
-      <div className="main-wrapper">
-        <Topbar
-          title={meta.title}
-          subtitle={meta.subtitle}
-          onMenuToggle={() => setMenuOpen((v) => !v)}
-          menuOpen={menuOpen}
+    <MobileActionsProvider>
+      <div className="app-layout">
+        <OfflineBanner />
+        <button
+          type="button"
+          className={`sidebar-backdrop ${menuOpen ? 'sidebar-backdrop--visible' : ''}`}
+          aria-hidden={!menuOpen}
+          tabIndex={menuOpen ? 0 : -1}
+          onClick={closeMenu}
         />
-        <main className="main-content">
-          <InstallPrompt />
-          <Outlet />
-        </main>
+        <Sidebar mobileOpen={menuOpen} onNavigate={closeMenu} />
+        <div className="main-wrapper">
+          <Topbar
+            title={hideTopbarTitle ? '' : meta.title}
+            subtitle={hideTopbarTitle ? '' : meta.subtitle}
+            onMenuToggle={() => setMenuOpen((v) => !v)}
+            menuOpen={menuOpen}
+          />
+          <main className="main-content">
+            <InstallPrompt />
+            <Outlet />
+          </main>
+        </div>
+        <BottomNav />
       </div>
-    </div>
+    </MobileActionsProvider>
   );
 }

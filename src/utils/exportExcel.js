@@ -1,5 +1,6 @@
 import * as XLSX from 'xlsx';
 import { formatDate } from './format';
+import { normalizeCurrency } from './currency';
 const downloadWorkbook = (workbook, filename) => {
   XLSX.writeFile(workbook, filename);
 };
@@ -7,7 +8,7 @@ const downloadWorkbook = (workbook, filename) => {
 const toDateStr = (value) => {
   if (!value) return '';
   const d = value?.toDate?.() ?? new Date(value);
-  return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('es-PE');
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('es-PY');
 };
 
 export const exportSuppliersExcel = (suppliers) => {
@@ -40,7 +41,7 @@ export const exportOpportunitiesExcel = (opportunities, supplierMap) => {
     'Volumen (kg)': o.estimatedVolumeKg ?? '',
     'Precio objetivo': o.targetPrice ?? '',
     'Oferta actual': o.currentOfferPrice ?? '',
-    Moneda: o.currency || '',
+    Moneda: normalizeCurrency(o.currency),
     Estado: o.negotiationStatus || '',
     'Fecha compra': toDateStr(o.expectedPurchaseDate),
     Probabilidad: o.probability ?? '',
@@ -124,7 +125,7 @@ export const exportFullReportExcel = (suppliers, opportunities, activities, snap
 
   const kpiSheet = [
     ['CRM BRASSUR — Inteligencia Comercial'],
-    ['Generado', new Date().toLocaleString('es-PE')],
+    ['Generado', new Date().toLocaleString('es-PY')],
     [],
     ['Indicador', 'Valor'],
     ['Proveedores totales', snapshot.kpis.totalSuppliers],

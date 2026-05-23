@@ -1,4 +1,5 @@
 import { parseCRMDate } from './parseDate';
+import { normalizeCurrency } from './currency';
 
 export const OPEN_OPPORTUNITY_STATUSES = [
   'Nueva',
@@ -64,4 +65,17 @@ export const computeOpportunityStats = (opportunities) => {
   });
 
   return { openCount, wonCount, lostCount, totalVolumeKg, totalPotentialValue };
+};
+
+/** Totales de valor potencial por moneda (sin convertir tipos de cambio). */
+export const computePotentialByCurrency = (opportunities) => {
+  const totals = { USD: 0, PYG: 0 };
+
+  opportunities.forEach((o) => {
+    if (!isOpenOpportunity(o.negotiationStatus)) return;
+    const code = normalizeCurrency(o.currency);
+    totals[code] += getOpportunityPotentialValue(o);
+  });
+
+  return totals;
 };

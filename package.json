@@ -10,9 +10,15 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "backup": "git add . && git commit -m 'backup automatico' && git push"
+    "backup": "git add . && git commit -m 'backup automatico' && git push",
+    "cap:icons": "node scripts/generate-android-icons.mjs",
+    "cap:sync": "npm run build && npx cap sync android",
+    "cap:open": "npx cap open android",
+    "cap:android": "npm run build && npx cap sync android && npx cap open android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.3.4",
+    "@capacitor/core": "^8.3.4",
     "firebase": "^12.13.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
@@ -20,6 +26,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.3.4",
     "@eslint/js": "^10.0.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -29,6 +36,7 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
     "sharp": "^0.34.5",
+    "typescript": "^5.9.3",
     "vite": "^8.0.12",
     "vite-plugin-pwa": "^1.3.0"
   }

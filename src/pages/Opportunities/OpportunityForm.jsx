@@ -1,5 +1,11 @@
-import { NEGOTIATION_STATUSES, CURRENCIES } from '../../constants/enums';
-import { toInputDate } from '../../utils/format';
+import { useState, useMemo } from 'react';
+import {
+  NEGOTIATION_STATUSES,
+  SIMPLIFIED_NEGOTIATION_STATUSES,
+  CURRENCIES,
+  CURRENCY_LABELS,
+} from '../../constants/enums';
+import { DEFAULT_CURRENCY, normalizeCurrency } from '../../utils/currency';
 
 const emptyOpportunity = {
   supplierId: '',
@@ -7,7 +13,7 @@ const emptyOpportunity = {
   estimatedVolumeKg: '',
   targetPrice: '',
   currentOfferPrice: '',
-  currency: 'PEN',
+  currency: DEFAULT_CURRENCY,
   negotiationStatus: 'Nueva',
   expectedPurchaseDate: '',
   probability: '',
@@ -20,25 +26,45 @@ export function getEmptyOpportunity(supplierId = '') {
 
 export function opportunityToForm(opp) {
   if (!opp) return getEmptyOpportunity();
+  const purchaseVal = opp.expectedPurchaseDate?.toDate?.() ?? opp.expectedPurchaseDate;
   return {
     supplierId: opp.supplierId || '',
     material: opp.material || '',
     estimatedVolumeKg: opp.estimatedVolumeKg ?? '',
     targetPrice: opp.targetPrice ?? '',
     currentOfferPrice: opp.currentOfferPrice ?? '',
-    currency: opp.currency || 'PEN',
+    currency: normalizeCurrency(opp.currency),
     negotiationStatus: opp.negotiationStatus || 'Nueva',
-    expectedPurchaseDate: toInputDate(opp.expectedPurchaseDate),
+    expectedPurchaseDate: purchaseVal
+      ? new Date(purchaseVal).toISOString().split('T')[0]
+      : '',
     probability: opp.probability ?? '',
     notes: opp.notes || '',
   };
 }
 
-export default function OpportunityForm({ form, onChange, suppliers, lockSupplier = false }) {
+export default function OpportunityForm({
+  form,
+  onChange,
+  suppliers,
+  lockSupplier = false,
+  simplified = true,
+}) {
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     onChange({ ...form, [name]: value });
   };
+
+  const statusOptions = useMemo(() => {
+    if (!simplified || showAdvanced) return NEGOTIATION_STATUSES;
+    const base = [...SIMPLIFIED_NEGOTIATION_STATUSES];
+    if (form.negotiationStatus && !base.includes(form.negotiationStatus)) {
+      base.push(form.negotiationStatus);
+    }
+    return base;
+  }, [simplified, showAdvanced, form.negotiationStatus]);
 
   return (
     <div className="form-grid">
@@ -75,92 +101,111 @@ export default function OpportunityForm({ form, onChange, suppliers, lockSupplie
           value={form.material}
           onChange={handleChange}
           required
-          placeholder="Ej: chatarra ferrosa, aluminio, cobre..."
+          placeholder="Ej: chatarra, aluminio, cobre..."
+          autoFocus={lockSupplier}
         />
       </div>
       <div className="form-field">
-        <label htmlFor="estimatedVolumeKg">Volumen estimado (kg)</label>
-        <input
-          id="estimatedVolumeKg"
-          name="estimatedVolumeKg"
-          type="number"
-          min="0"
-          step="0.01"
-          value={form.estimatedVolumeKg}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="form-field">
-        <label htmlFor="probability">Probabilidad (%)</label>
-        <input
-          id="probability"
-          name="probability"
-          type="number"
-          min="0"
-          max="100"
-          value={form.probability}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="form-field">
-        <label htmlFor="targetPrice">Precio objetivo</label>
-        <input
-          id="targetPrice"
-          name="targetPrice"
-          type="number"
-          min="0"
-          step="0.01"
-          value={form.targetPrice}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="form-field">
-        <label htmlFor="currentOfferPrice">Oferta actual</label>
-        <input
-          id="currentOfferPrice"
-          name="currentOfferPrice"
-          type="number"
-          min="0"
-          step="0.01"
-          value={form.currentOfferPrice}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="form-field">
-        <label htmlFor="currency">Moneda</label>
-        <select id="currency" name="currency" value={form.currency} onChange={handleChange}>
-          {CURRENCIES.map((c) => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
-      </div>
-      <div className="form-field">
-        <label htmlFor="negotiationStatus">Estado de negociación</label>
+        <label htmlFor="negotiationStatus">Estado *</label>
         <select
           id="negotiationStatus"
           name="negotiationStatus"
           value={form.negotiationStatus}
           onChange={handleChange}
+          required
         >
-          {NEGOTIATION_STATUSES.map((s) => (
+          {statusOptions.map((s) => (
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
       </div>
-      <div className="form-field">
-        <label htmlFor="expectedPurchaseDate">Fecha compra estimada</label>
-        <input
-          id="expectedPurchaseDate"
-          name="expectedPurchaseDate"
-          type="date"
-          value={form.expectedPurchaseDate}
-          onChange={handleChange}
-        />
-      </div>
       <div className="form-field form-grid--full">
         <label htmlFor="notes">Notas</label>
-        <textarea id="notes" name="notes" value={form.notes} onChange={handleChange} rows={3} />
+        <textarea id="notes" name="notes" value={form.notes} onChange={handleChange} rows={2} />
       </div>
+
+      {(!simplified || showAdvanced) && (
+        <>
+          <div className="form-field">
+            <label htmlFor="estimatedVolumeKg">Volumen estimado (kg)</label>
+            <input
+              id="estimatedVolumeKg"
+              name="estimatedVolumeKg"
+              type="number"
+              min="0"
+              step="0.01"
+              value={form.estimatedVolumeKg}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-field">
+            <label htmlFor="probability">Probabilidad (%)</label>
+            <input
+              id="probability"
+              name="probability"
+              type="number"
+              min="0"
+              max="100"
+              value={form.probability}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-field">
+            <label htmlFor="targetPrice">Precio objetivo</label>
+            <input
+              id="targetPrice"
+              name="targetPrice"
+              type="number"
+              min="0"
+              step="0.01"
+              value={form.targetPrice}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-field">
+            <label htmlFor="currentOfferPrice">Oferta actual</label>
+            <input
+              id="currentOfferPrice"
+              name="currentOfferPrice"
+              type="number"
+              min="0"
+              step="0.01"
+              value={form.currentOfferPrice}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-field">
+            <label htmlFor="currency">Moneda</label>
+            <select id="currency" name="currency" value={form.currency} onChange={handleChange}>
+              {CURRENCIES.map((c) => (
+                <option key={c} value={c}>{CURRENCY_LABELS[c] || c}</option>
+              ))}
+            </select>
+          </div>
+          <div className="form-field">
+            <label htmlFor="expectedPurchaseDate">Fecha compra estimada</label>
+            <input
+              id="expectedPurchaseDate"
+              name="expectedPurchaseDate"
+              type="date"
+              value={form.expectedPurchaseDate}
+              onChange={handleChange}
+            />
+          </div>
+        </>
+      )}
+
+      {simplified && (
+        <div className="form-grid--full form-advanced-toggle">
+          <button
+            type="button"
+            className="btn btn--secondary btn--sm"
+            onClick={() => setShowAdvanced((v) => !v)}
+          >
+            {showAdvanced ? '▲ Ocultar avanzado' : '▼ Modo avanzado (precio, volumen, fechas)'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

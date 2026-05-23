@@ -6,6 +6,7 @@ import {
 } from 'firebase/auth';
 import { auth } from '../firebase/firebase';
 import { INACTIVITY_MESSAGE } from '../constants/session';
+import { migratePENtoPYGOnce } from '../services/currencyMigrationService';
 
 const AuthContext = createContext(null);
 
@@ -21,6 +22,13 @@ export function AuthProvider({ children }) {
     });
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    migratePENtoPYGOnce().catch((err) => {
+      console.error('[Currency] Error en migración PEN→PYG:', err);
+    });
+  }, [user]);
 
   const clearSessionMessage = useCallback(() => {
     setSessionMessage(null);

@@ -30,6 +30,15 @@ export const ACTIVITY_TYPES = [
   'Nota',
 ];
 
+/** Estados visibles en formulario simplificado */
+export const SIMPLIFIED_NEGOTIATION_STATUSES = [
+  'Nueva',
+  'Negociando',
+  'Ganada',
+  'Perdida',
+];
+
+/** Estados completos (modo avanzado / datos legacy) */
 export const NEGOTIATION_STATUSES = [
   'Nueva',
   'En análisis',
@@ -40,4 +49,17 @@ export const NEGOTIATION_STATUSES = [
   'Pausada',
 ];
 
-export const CURRENCIES = ['PEN', 'USD'];
+/** Acciones rápidas de actividad (un clic) */
+export const QUICK_ACTIVITY_ACTIONS = [
+  { type: 'Llamada', label: '📞 Llamé', summary: 'Llamada realizada' },
+  { type: 'WhatsApp', label: '📩 WhatsApp', summary: 'Contacto por WhatsApp' },
+  { type: 'Visita', label: '🚗 Visité', summary: 'Visita realizada' },
+  { type: 'Nota', label: '📝 Nota', summary: 'Nota registrada' },
+];
+
+export const CURRENCIES = ['USD', 'PYG'];
+
+export const CURRENCY_LABELS = {
+  USD: 'USD — Dólar',
+  PYG: 'PYG — Guaraní',
+};

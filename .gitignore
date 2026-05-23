@@ -10,6 +10,13 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+
+# Android / Capacitor (build local)
+android/.gradle/
+android/.idea/
+android/local.properties
+android/**/build/
+android/captures/
 *.local
 .env
 .env.local

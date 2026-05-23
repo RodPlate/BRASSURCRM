@@ -11,9 +11,11 @@ import { subscribeWorkDayProgress, recordTaskCompleted } from '../../services/wo
 import {
   buildWorkCenterSnapshot,
   buildGreetingMessage,
+  formatUserGreetingName,
   hasWorkCenterTasks,
 } from '../../utils/workCenter';
 import { useAuth } from '../../context/AuthContext';
+import { useMobileActions } from '../../context/MobileActionsContext';
 import { toInputDate } from '../../utils/format';
 import StatusBadge from '../../components/common/StatusBadge';
 import NegotiationBadge from '../../components/common/NegotiationBadge';
@@ -38,6 +40,7 @@ function Section({ variant, title, count, children }) {
 
 export default function HoyPage() {
   const { user } = useAuth();
+  const { openQuickActivity, openEditSupplier } = useMobileActions();
   const [suppliers, setSuppliers] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [activities, setActivities] = useState([]);
@@ -322,14 +325,27 @@ export default function HoyPage() {
         </div>
       )}
 
-      <div className="page-header">
+      <div className="mobile-home-hero">
+        <h2 className="mobile-home-hero__title">
+          Buen día {formatUserGreetingName(user)}
+        </h2>
+        <button
+          type="button"
+          className="btn btn--primary btn--block mobile-home-hero__cta"
+          onClick={openQuickActivity}
+        >
+          Registrar actividad
+        </button>
+      </div>
+
+      <div className="page-header page-header--desktop">
         <div>
           <h2>Hoy</h2>
           <p>Centro de trabajo — tareas comerciales del día</p>
         </div>
       </div>
 
-      <div className="work-center-greeting">
+      <div className="work-center-greeting work-center-greeting--desktop">
         <strong>Centro de Trabajo</strong>
         <p>{greeting}</p>
       </div>
@@ -538,13 +554,13 @@ export default function HoyPage() {
       {detailSupplier && (
         <SupplierDetailPanel
           supplier={detailSupplier}
-          contacts={contacts}
           activities={activities}
           opportunities={opportunities}
-          suppliers={suppliers}
-          allContacts={contacts}
           onClose={() => setDetailSupplier(null)}
-          onEditSupplier={() => setDetailSupplier(null)}
+          onEditSupplier={(s) => {
+            setDetailSupplier(null);
+            openEditSupplier(s);
+          }}
         />
       )}
     </div>

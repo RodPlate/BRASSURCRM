@@ -3,6 +3,7 @@ import { subscribeOpportunities, deleteOpportunity } from '../../services/opport
 import { subscribeSuppliers } from '../../services/suppliersService';
 import { NEGOTIATION_STATUSES } from '../../constants/enums';
 import { formatDate, formatNumber, formatCurrency } from '../../utils/format';
+import { normalizeCurrency } from '../../utils/currency';
 import { sortByExpectedPurchaseDate, getOpportunityPotentialValue } from '../../utils/opportunities';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 import NegotiationBadge from '../../components/common/NegotiationBadge';
@@ -140,6 +141,7 @@ export default function OpportunitiesPage() {
                 <th>Volumen (kg)</th>
                 <th>Precio obj.</th>
                 <th>Oferta</th>
+                <th>Moneda</th>
                 <th>Estado</th>
                 <th>Valor pot.</th>
                 <th>Acciones</th>
@@ -154,6 +156,7 @@ export default function OpportunitiesPage() {
                   <td>{formatNumber(o.estimatedVolumeKg, ' kg')}</td>
                   <td>{formatCurrency(o.targetPrice, o.currency)}</td>
                   <td>{formatCurrency(o.currentOfferPrice, o.currency)}</td>
+                  <td>{normalizeCurrency(o.currency)}</td>
                   <td><NegotiationBadge value={o.negotiationStatus} /></td>
                   <td>{formatCurrency(getOpportunityPotentialValue(o), o.currency)}</td>
                   <td>

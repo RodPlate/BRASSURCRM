@@ -22,13 +22,13 @@
 }
 
 .dq-tier--a {
-  background: #1e5f4a;
+  background: var(--color-primary);
   color: #fff;
 }
 
 .dq-tier--b {
-  background: #c9a227;
-  color: #0f1f1a;
+  background: var(--color-accent);
+  color: var(--color-primary-dark);
 }
 
 .dq-tier--c {
